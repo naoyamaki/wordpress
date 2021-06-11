@@ -24,12 +24,11 @@ services:
       - ./app/src:/var/www/html
       - ./logs/app:/var/log/php
   db:
-    image: mysql:8.0.24
+    image: mysql:8.0.25
     ports:
       - 3306:3306
     restart: always
     environment:
-      - MYSQL_USER=root
       - MYSQL_ROOT_PASSWORD=#sample1234
       - MYSQL_DATABASE=wordpress
     volumes:

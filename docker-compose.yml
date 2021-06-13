@@ -1,17 +1,16 @@
 version: "3"
 services:
   web:
-    image: nginx:1.20-alpine
+    build: ./web
     ports:
       - 80:80
     depends_on:
       - app
     volumes:
-      - ./web/nginx:/etc/nginx
       - ./app/src:/var/www/html
       - ./logs/web:/var/log/nginx
   app:
-    image: wordpress:5.7-php8.0-fpm-alpine
+    build: ./app
     restart: always
     depends_on:
       - db
@@ -24,7 +23,7 @@ services:
       - ./app/src:/var/www/html
       - ./logs/app:/var/log/php
   db:
-    image: mysql:8.0.25
+    build: ./db
     ports:
       - 3306:3306
     restart: always
@@ -33,5 +32,4 @@ services:
       - MYSQL_DATABASE=wordpress
     volumes:
       - ./db/mysql_init:/docker-entrypoint-initdb.d
-#      - ./db/mysql:/etc/mysql
       - ./logs/db:/var/log/mysql

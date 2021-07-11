@@ -21,7 +21,6 @@ services:
   app:
     build: ./app
     image: wp_app
-    restart: always
     depends_on:
       - db
     environment:
@@ -35,7 +34,6 @@ services:
     image: wp_db
     ports:
       - 3306:3306
-    restart: always
     environment:
       - MYSQL_ROOT_PASSWORD=#sample1234
       - MYSQL_DATABASE=wordpress

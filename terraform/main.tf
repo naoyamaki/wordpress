@@ -1,3 +1,8 @@
+variable ecr_web_image {}
+variable ecr_app_image {}
+variable db_endpoint {}
+variable db_password {}
+
 provider "aws"{
 	region="ap-northeast-1"
 }
@@ -86,13 +91,6 @@ resource "aws_security_group" "wordpress-alb-sg" {
     cidr_blocks = ["0.0.0.0/0"]
     description = "open"
   }
-    ingress {
-    from_port   = 80
-    to_port     = 80
-    protocol    = "tcp"
-    security_groups = ["${aws_security_group.wordpress-service-sg.id}"]
-    description = "ALB-WEB"
-  }
 }
 resource "aws_security_group" "wordpress-service-sg" {
   name   = "wordpress-service-sg"
@@ -108,12 +106,6 @@ resource "aws_security_group" "wordpress-service-sg" {
     to_port     = 80
     protocol    = "tcp"
     security_groups = ["${aws_security_group.wordpress-alb-sg.id}"]
-  }
-  ingress {
-    from_port   = 2049
-    to_port     = 2049
-    protocol    = "tcp"
-    security_groups = ["${aws_security_group.wordpress-efs-sg.id}"]
   }
 }
 resource "aws_security_group" "wordpress-efs-sg" {
@@ -190,7 +182,7 @@ resource "aws_lb_target_group" "wordpress-tgg" {
 resource "aws_lb" "wordpress-alb" {
   drop_invalid_header_fields = "false"
   enable_deletion_protection = "false"
-  enable_http2               = "true"
+  enable_http2               = "false"
   idle_timeout               = "60"
   internal                   = "false"
   ip_address_type            = "ipv4"
@@ -199,10 +191,15 @@ resource "aws_lb" "wordpress-alb" {
   security_groups            = ["${aws_security_group.wordpress-alb-sg.id}"]
   subnets = ["${aws_subnet.public-a.id}", "${aws_subnet.public-c.id}"]
 }
-resource "aws_lb_target_group_attachment" "wordpress-alb-tgg" {
-  target_group_arn = "${aws_lb_target_group.wordpress-tgg.arn}"
-  target_id        = aws_instance.test.id // TO DO
-  port             = 80
+resource "aws_lb_listener" "wordpress-alb-listner" {
+  load_balancer_arn = "${aws_lb.wordpress-alb.arn}"
+  port              = 443
+  protocol          = "TCP"
+
+  default_action {
+    target_group_arn = "${aws_lb_target_group.wordpress-tgg.arn}"
+    type             = "forward"
+  }
 }
 
 # efs

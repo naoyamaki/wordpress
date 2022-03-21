@@ -1,4 +1,5 @@
-FROM nginx:1.20-alpine
+FROM wordpress:5.9-php8.1-fpm-alpine
+COPY etc/ /usr/local/etc/
 
 # UTC時間をJST時間に変更
 RUN apk --update add tzdata && \
@@ -6,6 +7,6 @@ RUN apk --update add tzdata && \
     apk del tzdata && \
     rm -rf /var/cache/apk/*
 
-COPY nginx/ /etc/nginx/
-
-CMD "envsubst '¥$APP_HOST' < /etc/nginx/conf.d/default.conf.template > /etc/nginx/conf.d/default.conf && nginx -g 'daemon off;'"
+# phpモジュールを追加
+RUN docker-php-ext-install mysqli
+RUN docker-php-ext-install pdo_mysql
